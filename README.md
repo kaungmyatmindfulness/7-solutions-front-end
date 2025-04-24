@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Here’s a refined and polished version of your write-up, formatted for clarity and professionalism while retaining all technical depth:
 
-## Getting Started
+---
 
-First, run the development server:
+# 7 Solutions Frontend Assignment
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Folder Structure: Feature-Sliced Design Inspired
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The project structure follows the [Feature-Sliced Design (FSD)](https://feature-sliced.design/) methodology, promoting **modularity**, **scalability**, and **maintainability** across features and layers.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Core Features & Logic
 
-## Learn More
+### 1. Auto-Deleting List (`useAutoDeleteList` Hook)
 
-To learn more about Next.js, take a look at the following resources:
+This custom hook manages a dynamic list where items can be temporarily moved to "Fruit" or "Vegetable" columns and are automatically returned to the main list after a delay.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+#### Key Mechanics:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **State Management**:
 
-## Deploy on Vercel
+   - Manages three lists: `mainList`, `fruitColumn`, and `vegetableColumn` via `useState`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2. **Item Movement**:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   - `handleMoveToColumn` moves an item from the main list to a target column based on its `type`, then triggers a timer via `startTimerForItem`.
+
+3. **Timer Control**:
+
+   - `startTimerForItem`:
+     - Clears any existing timer (`clearTimerForItem`) for that item to avoid duplicates.
+     - Starts a new `setTimeout` for `MOVE_BACK_DELAY_MS` (5 seconds) to call `handleMoveBackToList`.
+     - Timer IDs are stored in a `useRef` object (`timerRefs`) for persistence across renders without triggering re-renders.
+
+4. **Return Logic**:
+
+   - `handleMoveBackToList` is called either automatically (via timer) or manually (on user click).
+   - It removes the item from the current column, adds it back to `mainList`, and clears the associated timer.
+
+5. **Cleanup on Unmount**:
+
+   - A `useEffect` with an empty dependency array cleans up all timers on component unmount to avoid memory leaks.
+
+#### Why `useRef` for Timers?
+
+- It allows mutable references that persist across renders **without** causing re-renders.
+- Using `useState` would trigger re-renders unnecessarily on each timer update.
+
+---
+
+### 2. User Data Aggregation (`transformUserData` Function)
+
+This utility transforms an array of `User` objects into aggregated department-level statistics.
+
+#### How It Works:
+
+- Groups users by their `department`.
+- Computes total user count, average age, and other summary statistics.
+
+#### Why `Map` is Used:
+
+- **Efficient Lookups:** O(1) access time for reads/writes.
+- **Clear Intent:** Built-in methods (`get`, `set`, `has`) enhance code readability over plain objects.
+- **Dynamic Keys:** Handles runtime-generated keys (department names) reliably.
+
+> **Note:** A plain object (`{}`) would also suffice here, but `Map` provides slightly cleaner semantics and consistent performance for large datasets.
+
+---
+
+## Potential Improvements
+
+1. **UX Enhancement:**
+
+   - Add visual feedback (e.g., countdown, fade-out) to inform users when an item will be removed from the column.
+
+2. **Performance Optimization:**
+
+   - Use [`useTransition`](https://react.dev/reference/react/useTransition) to keep the UI responsive during list transitions, especially for large datasets.
+
+3. **Test Coverage:**
+
+   - Unit tests are included for `transformUserData` to ensure correctness and reliability.
